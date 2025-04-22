@@ -4,6 +4,31 @@
   
     
     <entry>
+      <title>ctfshow-web</title>
+      <link href="/2025/04/09/ctfshow-web/"/>
+      <url>/2025/04/09/ctfshow-web/</url>
+      
+        <content type="html"><![CDATA[<h1 id="CTFshow-刷题记录"><a href="#CTFshow-刷题记录" class="headerlink" title="CTFshow 刷题记录"></a>CTFshow 刷题记录</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><blockquote><p>不积跬步，无以至千里。</p></blockquote><p>意识到之前一段时间没有高强度刷题和培养思路，借着培训的机会来品尝一下 ctfshow 中的 web 好题。</p><p>本帖仅供学习记录，不收录弱智题目。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> ctf </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> writeup </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>jnctf_wp</title>
       <link href="/2025/03/31/jnctf-wp/"/>
       <url>/2025/03/31/jnctf-wp/</url>
